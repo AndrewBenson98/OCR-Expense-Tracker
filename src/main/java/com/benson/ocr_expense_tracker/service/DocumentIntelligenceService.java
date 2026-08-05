@@ -86,22 +86,22 @@ public class DocumentIntelligenceService {
                         }
 
                         // Items - store as JSON string if possible, fall back to content
-                        com.azure.ai.documentintelligence.models.DocumentField itemsField = fields.get("Items");
-                        if (itemsField != null) {
-                            try {
-                                Object itemsVal = itemsField.getValueList();
-                                // Try to serialize the underlying value to JSON. Many SDK types are simple maps/lists.
-                                String itemsJson = objectMapper.writeValueAsString(itemsVal != null ? itemsVal : Collections.emptyList());
-                                extractedData.put("items", itemsJson != null ? itemsJson : "[]");
-                            } catch (Exception ex) {
-                                // Fallback to content or empty list
-                                log.warn("Failed to serialize items field, falling back to content", ex);
-                                String itemsContent = itemsField.getContent();
-                                extractedData.put("items", itemsContent != null ? itemsContent : "[]");
-                            }
-                        } else {
+//                        com.azure.ai.documentintelligence.models.DocumentField itemsField = fields.get("Items");
+//                        if (itemsField != null) {
+//                            try {
+//                                Object itemsVal = itemsField.getValueList();
+//                                // Try to serialize the underlying value to JSON. Many SDK types are simple maps/lists.
+//                                String itemsJson = objectMapper.writeValueAsString(itemsVal != null ? itemsVal : Collections.emptyList());
+//                                extractedData.put("items", itemsJson != null ? itemsJson : "[]");
+//                            } catch (Exception ex) {
+//                                // Fallback to content or empty list
+//                                log.warn("Failed to serialize items field, falling back to content", ex);
+//                                String itemsContent = itemsField.getContent();
+//                                extractedData.put("items", itemsContent != null ? itemsContent : "[]");
+//                            }
+//                        } else {
                             extractedData.put("items", "[]");
-                        }
+//                        }
                     }
                 } else {
                     // No documents found

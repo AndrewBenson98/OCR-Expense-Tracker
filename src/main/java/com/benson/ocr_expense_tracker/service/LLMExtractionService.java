@@ -37,9 +37,10 @@ public class LLMExtractionService {
         this.objectMapper = new ObjectMapper();
     }
 
+
     public Receipt extractReceiptData(Map<String, String> ocrData) {
         log.info("Extracting receipt data using Azure OpenAI");
-
+        log.debug("OCR Data: " +ocrData);
         try {
             String prompt = buildExtractionPrompt(ocrData);
             
@@ -48,9 +49,10 @@ public class LLMExtractionService {
                     "You are an expert receipt parser. Extract receipt information and return ONLY valid JSON, no markdown, no code blocks."));
             messages.add(new ChatRequestUserMessage(prompt));
 
+            log.debug("Prompt sent to LLM: {}", prompt);
+
             ChatCompletionsOptions options = new ChatCompletionsOptions(messages)
-                    .setTemperature(0.0)
-                    .setMaxTokens(1000);
+                    .setTemperature(0.0);
 
             log.debug("Calling Azure OpenAI with deployment: {}", deploymentName);
             ChatCompletions response = client.getChatCompletions(deploymentName, options);
@@ -74,28 +76,19 @@ public class LLMExtractionService {
 
     private String buildExtractionPrompt(Map<String, String> ocrData) throws Exception {
         return String.format("""
-                Extract receipt information from the following OCR data and return ONLY a JSON object with this exact structure:
-                {
-                  "merchant": "string",
-                  "date": "YYYY-MM-DD",
-                  "totalAmount": number,
-                  "tax": number,
-                  "category": "GROCERIES|ENTERTAINMENT|TRANSPORT|DINING|OTHER",
-                  "items": [{"name": "string", "price": number}]
-                }
-                
-                OCR Data:
-                %s
-                
-                Rules:
-                - merchant: Name of the store/restaurant. If not found, use "Unknown"
-                - date: Extract and format as YYYY-MM-DD. If not found, use 1970-01-01
-                - totalAmount: Total amount paid (must be a number, remove currency symbols). If not found, use 0
-                - tax: Tax amount (must be a number, remove currency symbols). Default to 0 if not found
-                - category: Choose ONE category based on merchant type. Default to OTHER
-                - items: List of items purchased with names and prices. Use empty array [] if none found
-                
-                Return ONLY valid JSON, no markdown, no code blocks, no explanations.
+            Extract details from the provided OCR content into the specified JSON structure.
+
+            Required Fields:
+            - merchant: Store or business name (default "Unknown")
+            - date: Transaction date in YYYY-MM-DD (default "1970-01-01")
+            - totalAmount: Total numeric amount paid without currency symbols (default 0)
+            - tax: Total tax numeric amount (default 0)
+            - category: Choose one: GROCERIES, ENTERTAINMENT, TRANSPORT, DINING, OTHER
+            - items: Array of purchased items with "name" and numeric "price" (default [])
+
+            <ocr_data>
+            %s
+            </ocr_data>
                 """, objectMapper.writeValueAsString(ocrData));
     }
 

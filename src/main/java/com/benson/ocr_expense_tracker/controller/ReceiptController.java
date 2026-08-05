@@ -36,10 +36,12 @@ public class ReceiptController {
             Map<String, String> ocrData = documentIntelligenceService.analyzeReceipt(imageData);
             log.info("OCR analysis completed, extracting structured data");
 
-            Receipt receipt = llmExtractionService.extractReceiptData(ocrData);
-            log.info("Receipt extracted: merchant={}, total={}", receipt.getMerchant(), receipt.getTotalAmount());
 
-            return ResponseEntity.ok(receipt);
+//            Receipt receipt = llmExtractionService.extractReceiptData(ocrData);
+//            log.info("Receipt extracted: merchant={}, total={}", receipt.getMerchant(), receipt.getTotalAmount());
+
+//            return ResponseEntity.ok(receipt);
+            return ResponseEntity.ok(ocrData);
         } catch (IOException e) {
             log.error("Error reading file", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
