@@ -1,17 +1,23 @@
 package com.benson.ocr_expense_tracker.service;
 
-import com.azure.ai.openai.OpenAIClient;
-import com.azure.ai.openai.OpenAIClientBuilder;
-import com.azure.ai.openai.models.ChatCompletions;
-import com.azure.ai.openai.models.ChatCompletionsOptions;
-import com.azure.ai.openai.models.ChatRequestMessage;
-import com.azure.ai.openai.models.ChatRequestSystemMessage;
-import com.azure.ai.openai.models.ChatRequestUserMessage;
+//import com.azure.ai.openai.OpenAIClient;
+//import com.azure.ai.openai.OpenAIClientBuilder;
+//import com.azure.ai.openai.models.ChatCompletions;
+//import com.azure.ai.openai.models.ChatCompletionsOptions;
+//import com.azure.ai.openai.models.ChatRequestMessage;
+//import com.azure.ai.openai.models.ChatRequestSystemMessage;
+//import com.azure.ai.openai.models.ChatRequestUserMessage;
+//import com.azure.core.credential.AzureKeyCredential;
+
+import com.azure.ai.inference.ChatCompletionsClient;
+import com.azure.ai.inference.ChatCompletionsClientBuilder;
+import com.azure.ai.inference.models.*;
 import com.azure.core.credential.AzureKeyCredential;
 import com.benson.ocr_expense_tracker.config.AzureConfig;
 import com.benson.ocr_expense_tracker.model.Receipt;
 import com.benson.ocr_expense_tracker.model.Category;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +30,28 @@ import java.util.Map;
 @Service
 public class LLMExtractionService {
 
-    private final OpenAIClient client;
+    private final ChatCompletionsClient client;
     private final String deploymentName;
     private final ObjectMapper objectMapper;
 
     public LLMExtractionService(AzureConfig azureConfig) {
-        this.client = new OpenAIClientBuilder()
+        this.client = new ChatCompletionsClientBuilder()
                 .endpoint(azureConfig.getOpenAI().getEndpoint())
                 .credential(new AzureKeyCredential(azureConfig.getOpenAI().getApiKey()))
                 .buildClient();
         this.deploymentName = azureConfig.getOpenAI().getDeploymentName();
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    }
+
+    public String testllm(){
+        String prompt = "Hi how are you?";
+        List<ChatRequestMessage> messages = new ArrayList<>();
+        messages.add(new ChatRequestSystemMessage(
+                "You are a helpful assistant."));
+        messages.add(new ChatRequestUserMessage(prompt));
+        ChatCompletionsOptions options = new ChatCompletionsOptions(messages)
+                .setTemperature(0.0);
+        return client.complete(options).getChoices().get(0).getMessage().getContent();
     }
 
 
@@ -55,7 +72,7 @@ public class LLMExtractionService {
                     .setTemperature(0.0);
 
             log.debug("Calling Azure OpenAI with deployment: {}", deploymentName);
-            ChatCompletions response = client.getChatCompletions(deploymentName, options);
+            ChatCompletions response = client.complete(options);
 
             String responseText = response.getChoices()
                     .get(0)
@@ -80,7 +97,7 @@ public class LLMExtractionService {
 
             Required Fields:
             - merchant: Store or business name (default "Unknown")
-            - date: Transaction date in YYYY-MM-DD (default "1970-01-01")
+            - date: Transaction date in YYYY-MM-DD (default "1970-01-01").
             - totalAmount: Total numeric amount paid without currency symbols (default 0)
             - tax: Total tax numeric amount (default 0)
             - category: Choose one: GROCERIES, ENTERTAINMENT, TRANSPORT, DINING, OTHER

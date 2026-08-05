@@ -84,8 +84,8 @@
         <p th:if="${filename}"><strong>Uploaded file:</strong> <span th:text="${filename}"></span></p>
     </div>
 
-    <div class="card" th:if="${!#maps.isEmpty(extractedData)}">
-        <h2>Extracted Data</h2>
+    <div class="card" th:if="${receipt != null}">
+        <h2>Receipt Result</h2>
         <table>
             <thead>
                 <tr>
@@ -94,15 +94,48 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="entry : ${extractedData}">
-                    <td th:text="${entry.key}"></td>
-                    <td th:text="${entry.value}"></td>
+                <tr>
+                    <td>Merchant</td>
+                    <td th:text="${receipt.merchant}"></td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td th:text="${receipt.date}"></td>
+                </tr>
+                <tr>
+                    <td>Total Amount</td>
+                    <td th:text="${receipt.totalAmount}"></td>
+                </tr>
+                <tr>
+                    <td>Tax</td>
+                    <td th:text="${receipt.tax}"></td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td th:text="${receipt.category}"></td>
                 </tr>
             </tbody>
         </table>
 
+        <h3>Items</h3>
+        <table th:if="${!#lists.isEmpty(receipt.items)}">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${receipt.items}">
+                    <td th:text="${item.name}"></td>
+                    <td th:text="${item.price}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(receipt.items)}">No items detected.</p>
+
         <h3>JSON Output</h3>
-        <textarea readonly th:text="${extractedDataJson}"></textarea>
+        <textarea readonly th:text="${receiptJson}"></textarea>
     </div>
 </body>
 </html>

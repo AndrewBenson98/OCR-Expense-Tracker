@@ -37,11 +37,11 @@ public class ReceiptController {
             log.info("OCR analysis completed, extracting structured data");
 
 
-//            Receipt receipt = llmExtractionService.extractReceiptData(ocrData);
-//            log.info("Receipt extracted: merchant={}, total={}", receipt.getMerchant(), receipt.getTotalAmount());
+            Receipt receipt = llmExtractionService.extractReceiptData(ocrData);
+            log.info("Receipt extracted: merchant={}, total={}", receipt.getMerchant(), receipt.getTotalAmount());
 
-//            return ResponseEntity.ok(receipt);
-            return ResponseEntity.ok(ocrData);
+            return ResponseEntity.ok(receipt);
+//            return ResponseEntity.ok(ocrData);
         } catch (IOException e) {
             log.error("Error reading file", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -56,5 +56,11 @@ public class ReceiptController {
     @GetMapping("/health")
     public ResponseEntity<?> health() {
         return ResponseEntity.ok(Map.of("status", "healthy"));
+    }
+
+
+    @GetMapping("/testllm")
+    public ResponseEntity<?> tesllm() {
+        return ResponseEntity.ok(Map.of("response", llmExtractionService.testllm()));
     }
 }

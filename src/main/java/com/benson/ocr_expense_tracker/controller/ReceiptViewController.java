@@ -1,8 +1,10 @@
 package com.benson.ocr_expense_tracker.controller;
 
+import com.benson.ocr_expense_tracker.model.Receipt;
 import com.benson.ocr_expense_tracker.service.DocumentIntelligenceService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.benson.ocr_expense_tracker.service.LLMExtractionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Slf4j
@@ -22,12 +23,13 @@ import java.util.Map;
 public class ReceiptViewController {
 
     private final DocumentIntelligenceService documentIntelligenceService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final LLMExtractionService llmExtractionService;
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @GetMapping("/")
     public String showUploadForm(Model model) {
-        model.addAttribute("extractedData", new LinkedHashMap<String, String>());
-        model.addAttribute("extractedDataJson", "{}");
+        model.addAttribute("receipt", null);
+        model.addAttribute("receiptJson", "{}");
         return "receipt-upload";
     }
 
@@ -41,10 +43,15 @@ public class ReceiptViewController {
         }
 
         try {
-            Map<String, String> extractedData = documentIntelligenceService.analyzeReceipt(file.getBytes());
+            Map<String, String> ocrData = documentIntelligenceService.analyzeReceipt(file.getBytes());
+            log.info("OCR analysis completed, extracting structured data");
+
+            Receipt receipt = llmExtractionService.extractReceiptData(ocrData);
+            log.info("Receipt extracted: merchant={}, total={}", receipt.getMerchant(), receipt.getTotalAmount());
+
             model.addAttribute("filename", file.getOriginalFilename());
-            model.addAttribute("extractedData", extractedData);
-            model.addAttribute("extractedDataJson", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(extractedData));
+            model.addAttribute("receipt", receipt);
+            model.addAttribute("receiptJson", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(receipt));
             model.addAttribute("message", "Receipt processed successfully.");
             return "receipt-upload";
         } catch (IOException e) {
