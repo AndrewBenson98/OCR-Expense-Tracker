@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt OCR Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem auto;
+            max-width: 900px;
+            color: #1f2937;
+        }
+        .card {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        input[type="file"] {
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        button {
+            width: fit-content;
+            padding: 0.6rem 1rem;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .message {
+            color: #166534;
+            font-weight: bold;
+        }
+        .error {
+            color: #b91c1c;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 0.7rem;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6;
+        }
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            font-family: Consolas, monospace;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Receipt OCR Viewer</h1>
+        <p>Upload a receipt image and inspect the data returned by Azure Document Intelligence.</p>
+
+        <form th:action="@{/upload}" method="post" enctype="multipart/form-data">
+            <label for="file">Receipt image</label>
+            <input id="file" name="file" type="file" accept="image/*" required>
+            <button type="submit">Analyze Receipt</button>
+        </form>
+
+        <p class="message" th:if="${message}" th:text="${message}"></p>
+        <p class="error" th:if="${error}" th:text="${error}"></p>
+        <p th:if="${filename}"><strong>Uploaded file:</strong> <span th:text="${filename}"></span></p>
+    </div>
+
+    <div class="card" th:if="${!#maps.isEmpty(extractedData)}">
+        <h2>Extracted Data</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="entry : ${extractedData}">
+                    <td th:text="${entry.key}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>JSON Output</h3>
+        <textarea readonly th:text="${extractedDataJson}"></textarea>
+    </div>
+</body>
+</html>

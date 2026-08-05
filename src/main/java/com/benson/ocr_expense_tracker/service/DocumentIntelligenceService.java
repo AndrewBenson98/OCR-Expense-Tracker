@@ -76,8 +76,18 @@ public class DocumentIntelligenceService {
                             extractedData.put("totalAmount", "0.0");
                         }
 
+                        //Subtotal
+                        com.azure.ai.documentintelligence.models.DocumentField subtotalField = fields.get("Subtotal");
+                        if (subtotalField != null) {
+                            String subtotal = subtotalField.getContent() != null ? subtotalField.getContent() : Objects.toString(subtotalField.getValueString(), "0.0");
+                            extractedData.put("subtotal", subtotal != null ? subtotal : "0.0");
+                        } else {
+                            extractedData.put("subtotal", "0.0");
+                        }
+
+
                         // Tax
-                        com.azure.ai.documentintelligence.models.DocumentField taxField = fields.get("Tax");
+                        com.azure.ai.documentintelligence.models.DocumentField taxField = fields.get("TotalTax");
                         if (taxField != null) {
                             String tax = taxField.getContent() != null ? taxField.getContent() : Objects.toString(taxField.getValueString(), "0.0");
                             extractedData.put("tax", tax != null ? tax : "0.0");
