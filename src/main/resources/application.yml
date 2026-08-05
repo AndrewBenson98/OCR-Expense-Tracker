@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: ocr-expense-tracker
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.benson.ocr_expense_tracker: DEBUG
+
+# Azure Configuration - Replace with your actual values
+
+azure:
+  document-intelligence:
+    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT}
+    api-key: ${AZURE_DOCUMENT_INTELLIGENCE_KEY}
+  open-ai:
+    endpoint: ${AZURE_OPENAI_ENDPOINT}
+    api-key: ${AZURE_OPENAI_KEY}
+    deployment-name: ${AZURE_OPENAI_DEPLOYMENT}
+    api-version: ${AZURE_OPENAI_API_VERSION}

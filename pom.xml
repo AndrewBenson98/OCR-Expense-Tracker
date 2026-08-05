@@ -40,6 +40,27 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
+		<!-- Azure Document Intelligence SDK -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-ai-documentintelligence</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+		
+		<!-- Azure OpenAI SDK -->
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-ai-openai</artifactId>
+			<version>1.0.0-beta.9</version>
+		</dependency>
+		
+		<!-- Jackson for JSON processing -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
