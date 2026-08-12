@@ -95,23 +95,44 @@ public class DocumentIntelligenceService {
                             extractedData.put("tax", "0.0");
                         }
 
-                        // Items - store as JSON string if possible, fall back to content
-//                        com.azure.ai.documentintelligence.models.DocumentField itemsField = fields.get("Items");
-//                        if (itemsField != null) {
-//                            try {
-//                                Object itemsVal = itemsField.getValueList();
-//                                // Try to serialize the underlying value to JSON. Many SDK types are simple maps/lists.
-//                                String itemsJson = objectMapper.writeValueAsString(itemsVal != null ? itemsVal : Collections.emptyList());
-//                                extractedData.put("items", itemsJson != null ? itemsJson : "[]");
-//                            } catch (Exception ex) {
-//                                // Fallback to content or empty list
-//                                log.warn("Failed to serialize items field, falling back to content", ex);
-//                                String itemsContent = itemsField.getContent();
-//                                extractedData.put("items", itemsContent != null ? itemsContent : "[]");
-//                            }
-//                        } else {
+                        // Items - extract only the item fields requested by the Azure receipt model
+                        com.azure.ai.documentintelligence.models.DocumentField itemsField = fields.get("Items");
+                        if (itemsField != null) {
+                            try {
+                                List<Map<String, String>> extractedItems = new ArrayList<>();
+                                Object rawItems = itemsField.getValueList();
+
+                                if (rawItems instanceof List) {
+                                    for (Object itemObj : (List<?>) rawItems) {
+                                        if (!(itemObj instanceof com.azure.ai.documentintelligence.models.DocumentField)) {
+                                            continue;
+                                        }
+
+                                        com.azure.ai.documentintelligence.models.DocumentField itemField =
+                                                (com.azure.ai.documentintelligence.models.DocumentField) itemObj;
+                                        Map<String, com.azure.ai.documentintelligence.models.DocumentField> itemFields = itemField.getValueMap();
+                                        if (itemFields == null) {
+                                            continue;
+                                        }
+
+                                        Map<String, String> itemDetails = new LinkedHashMap<>();
+                                        itemDetails.put("Description", getDocumentFieldText(itemFields.get("Description")));
+                                        itemDetails.put("Quantity", getDocumentFieldNumber(itemFields.get("Quantity")));
+                                        itemDetails.put("Price", getDocumentFieldCurrency(itemFields.get("Price")));
+                                        itemDetails.put("TotalPrice", getDocumentFieldCurrency(itemFields.get("TotalPrice")));
+                                        extractedItems.add(itemDetails);
+                                    }
+                                }
+
+                                extractedData.put("items", objectMapper.writeValueAsString(extractedItems));
+                            } catch (Exception ex) {
+                                log.warn("Failed to extract item details from receipt, falling back to raw item content", ex);
+                                String itemsContent = itemsField.getContent();
+                                extractedData.put("items", itemsContent != null ? itemsContent : "[]");
+                            }
+                        } else {
                             extractedData.put("items", "[]");
-//                        }
+                        }
                     }
                 } else {
                     // No documents found
@@ -135,5 +156,59 @@ public class DocumentIntelligenceService {
             log.error("Error analyzing receipt with Document Intelligence", e);
             throw new RuntimeException("Failed to analyze receipt with Document Intelligence: " + e.getMessage(), e);
         }
+    }
+
+    private String getDocumentFieldText(com.azure.ai.documentintelligence.models.DocumentField field) {
+        if (field == null) {
+            return "";
+        }
+        if (field.getContent() != null && !field.getContent().isBlank()) {
+            return field.getContent();
+        }
+        if (field.getValueString() != null && !field.getValueString().isBlank()) {
+            return field.getValueString();
+        }
+        if (field.getValueNumber() != null) {
+            return String.valueOf(field.getValueNumber());
+        }
+        if (field.getValueCurrency() != null ) {
+            return String.valueOf(field.getValueCurrency().getAmount());
+        }
+        return "";
+    }
+
+    private String getDocumentFieldNumber(com.azure.ai.documentintelligence.models.DocumentField field) {
+        if (field == null) {
+            return "";
+        }
+        if (field.getContent() != null && !field.getContent().isBlank()) {
+            return field.getContent();
+        }
+        if (field.getValueNumber() != null) {
+            return String.valueOf(field.getValueNumber());
+        }
+        if (field.getValueString() != null && !field.getValueString().isBlank()) {
+            return field.getValueString();
+        }
+        return "";
+    }
+
+    private String getDocumentFieldCurrency(com.azure.ai.documentintelligence.models.DocumentField field) {
+        if (field == null) {
+            return "";
+        }
+        if (field.getContent() != null && !field.getContent().isBlank()) {
+            return field.getContent();
+        }
+        if (field.getValueCurrency() != null) {
+            return String.valueOf(field.getValueCurrency().getAmount());
+        }
+        if (field.getValueString() != null && !field.getValueString().isBlank()) {
+            return field.getValueString();
+        }
+        if (field.getValueNumber() != null) {
+            return String.valueOf(field.getValueNumber());
+        }
+        return "";
     }
 }
