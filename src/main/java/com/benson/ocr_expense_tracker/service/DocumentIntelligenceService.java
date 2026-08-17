@@ -4,6 +4,8 @@ import com.azure.ai.documentintelligence.DocumentIntelligenceClient;
 import com.azure.ai.documentintelligence.DocumentIntelligenceClientBuilder;
 import com.azure.ai.documentintelligence.models.AnalyzeDocumentOptions;
 import com.azure.core.credential.AzureKeyCredential;
+import com.azure.identity.DefaultAzureCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.benson.ocr_expense_tracker.config.AzureConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,8 @@ public class DocumentIntelligenceService {
     public DocumentIntelligenceService(AzureConfig azureConfig) {
         this.client = new DocumentIntelligenceClientBuilder()
                 .endpoint(azureConfig.getDocumentIntelligence().getEndpoint())
-                .credential(new AzureKeyCredential(azureConfig.getDocumentIntelligence().getApiKey()))
+//                .credential(new AzureKeyCredential(azureConfig.getDocumentIntelligence().getApiKey()))
+                .credential(azureConfig.getDefaultAzureCredential())
                 .buildClient();
         this.objectMapper = new ObjectMapper();
     }

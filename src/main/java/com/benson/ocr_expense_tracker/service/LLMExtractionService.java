@@ -37,7 +37,8 @@ public class LLMExtractionService {
     public LLMExtractionService(AzureConfig azureConfig) {
         this.client = new ChatCompletionsClientBuilder()
                 .endpoint(azureConfig.getOpenAI().getEndpoint())
-                .credential(new AzureKeyCredential(azureConfig.getOpenAI().getApiKey()))
+//                .credential(new AzureKeyCredential(azureConfig.getOpenAI().getApiKey()))
+                .credential(azureConfig.getDefaultAzureCredential())
                 .buildClient();
         this.deploymentName = azureConfig.getOpenAI().getDeploymentName();
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
