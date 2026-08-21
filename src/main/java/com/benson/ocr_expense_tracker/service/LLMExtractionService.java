@@ -1,21 +1,7 @@
 package com.benson.ocr_expense_tracker.service;
 
-//import com.azure.ai.openai.OpenAIClient;
-//import com.azure.ai.openai.OpenAIClientBuilder;
-//import com.azure.ai.openai.models.ChatCompletions;
-//import com.azure.ai.openai.models.ChatCompletionsOptions;
-//import com.azure.ai.openai.models.ChatRequestMessage;
-//import com.azure.ai.openai.models.ChatRequestSystemMessage;
-//import com.azure.ai.openai.models.ChatRequestUserMessage;
-//import com.azure.core.credential.AzureKeyCredential;
-
-import com.azure.ai.inference.ChatCompletionsClient;
-import com.azure.ai.inference.ChatCompletionsClientBuilder;
-//import com.azure.ai.inference.models.*;
 import com.azure.ai.openai.OpenAIClient;
-import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.ai.openai.models.*;
-import com.azure.core.credential.AzureKeyCredential;
 import com.benson.ocr_expense_tracker.config.AzureConfig;
 import com.benson.ocr_expense_tracker.model.Receipt;
 import com.benson.ocr_expense_tracker.model.Category;
@@ -37,15 +23,10 @@ public class LLMExtractionService {
     private final String deploymentName;
     private final ObjectMapper objectMapper;
 
-    public LLMExtractionService(AzureConfig azureConfig) {
-        this.client = new OpenAIClientBuilder()
-                .endpoint(azureConfig.getOpenAI().getEndpoint())
-//                .credential(new AzureKeyCredential(azureConfig.getOpenAI().getApiKey()))
-                .credential(azureConfig.getDefaultAzureCredential())
-                .buildClient();
+    public LLMExtractionService(OpenAIClient client, AzureConfig azureConfig) {
+        this.client = client;
         this.deploymentName = azureConfig.getOpenAI().getDeploymentName();
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-
     }
 
 //    public String testllm(){
