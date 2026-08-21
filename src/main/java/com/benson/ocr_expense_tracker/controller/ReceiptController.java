@@ -59,8 +59,8 @@ public class ReceiptController {
     }
 
 
-    @GetMapping("/testllm")
-    public ResponseEntity<?> tesllm() {
-        return ResponseEntity.ok(Map.of("response", llmExtractionService.testllm()));
-    }
+//    @GetMapping("/testllm")
+//    public ResponseEntity<?> tesllm() {
+//        return ResponseEntity.ok(Map.of("response", llmExtractionService.testllm()));
+//    }
 }

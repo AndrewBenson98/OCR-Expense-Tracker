@@ -14,14 +14,10 @@ logging:
     root: INFO
     com.benson.ocr_expense_tracker: DEBUG
 
-# Azure Configuration - Replace with your actual values
-
 azure:
   document-intelligence:
-    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT}
-    api-key: ${AZURE_DOCUMENT_INTELLIGENCE_KEY}
+    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:https://doc-intel-ocr-expense-tracker.cognitiveservices.azure.com/}
   open-ai:
-    endpoint: ${AZURE_OPENAI_ENDPOINT}
-    api-key: ${AZURE_OPENAI_KEY}
-    deployment-name: ${AZURE_OPENAI_DEPLOYMENT}
-    api-version: ${AZURE_OPENAI_API_VERSION}
+    endpoint: ${AZURE_OPENAI_ENDPOINT:https://openai-ocr-expense-tracker.openai.azure.com/}
+    deployment-name: ${AZURE_OPENAI_DEPLOYMENT:gpt-5.4-mini}
+    api-version: ${AZURE_OPENAI_API_VERSION:2026-03-17}

@@ -20,13 +20,13 @@ public class AzureConfig {
     @Data
     public static class DocumentIntelligence {
         private String endpoint;
-        private String apiKey;
+//        private String apiKey;
     }
 
     @Data
     public static class OpenAI {
         private String endpoint;
-        private String apiKey;
+//        private String apiKey;
         private String deploymentName;
         private String apiVersion;
     }

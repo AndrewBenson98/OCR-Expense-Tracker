@@ -11,7 +11,10 @@ package com.benson.ocr_expense_tracker.service;
 
 import com.azure.ai.inference.ChatCompletionsClient;
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
-import com.azure.ai.inference.models.*;
+//import com.azure.ai.inference.models.*;
+import com.azure.ai.openai.OpenAIClient;
+import com.azure.ai.openai.OpenAIClientBuilder;
+import com.azure.ai.openai.models.*;
 import com.azure.core.credential.AzureKeyCredential;
 import com.benson.ocr_expense_tracker.config.AzureConfig;
 import com.benson.ocr_expense_tracker.model.Receipt;
@@ -30,30 +33,31 @@ import java.util.Map;
 @Service
 public class LLMExtractionService {
 
-    private final ChatCompletionsClient client;
+    private final OpenAIClient client;
     private final String deploymentName;
     private final ObjectMapper objectMapper;
 
     public LLMExtractionService(AzureConfig azureConfig) {
-        this.client = new ChatCompletionsClientBuilder()
+        this.client = new OpenAIClientBuilder()
                 .endpoint(azureConfig.getOpenAI().getEndpoint())
 //                .credential(new AzureKeyCredential(azureConfig.getOpenAI().getApiKey()))
                 .credential(azureConfig.getDefaultAzureCredential())
                 .buildClient();
         this.deploymentName = azureConfig.getOpenAI().getDeploymentName();
         this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
     }
 
-    public String testllm(){
-        String prompt = "Hi how are you?";
-        List<ChatRequestMessage> messages = new ArrayList<>();
-        messages.add(new ChatRequestSystemMessage(
-                "You are a helpful assistant."));
-        messages.add(new ChatRequestUserMessage(prompt));
-        ChatCompletionsOptions options = new ChatCompletionsOptions(messages)
-                .setTemperature(0.0);
-        return client.complete(options).getChoices().get(0).getMessage().getContent();
-    }
+//    public String testllm(){
+//        String prompt = "Hi how are you?";
+//        List<ChatRequestMessage> messages = new ArrayList<>();
+//        messages.add(new ChatRequestSystemMessage(
+//                "You are a helpful assistant."));
+//        messages.add(new ChatRequestUserMessage(prompt));
+//        ChatCompletionsOptions options = new ChatCompletionsOptions(messages)
+//                .setTemperature(0.0);
+//        return client.getChatCompletions(deploymentName,options).getChoices().get(0).getMessage().getContent();
+//    }
 
 
     public Receipt extractReceiptData(Map<String, String> ocrData) {
@@ -73,7 +77,7 @@ public class LLMExtractionService {
                     .setTemperature(0.0);
 
             log.debug("Calling Azure OpenAI with deployment: {}", deploymentName);
-            ChatCompletions response = client.complete(options);
+            ChatCompletions response = client.getChatCompletions(deploymentName,options);
 
             String responseText = response.getChoices()
                     .get(0)
